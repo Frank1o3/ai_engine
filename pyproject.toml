@@ -1,0 +1,19 @@
+[project]
+    authors=[{name="Frank1o3", email="jahdy1o3@gmail.com"}]
+    dependencies=["groq>=1.6.0", "pydantic>=2.13.4"]
+    description="Add your description here"
+    license="BSD-3-Clause"
+    name="ai-engine"
+    readme="README.md"
+    requires-python=">=3.14"
+    version="0.1.0"
+
+    [project.scripts]
+        ai-engine="ai_engine.main:main"
+
+[build-system]
+    build-backend="uv_build"
+    requires=["uv_build>=0.12.3,<0.13.0"]
+
+[dependency-groups]
+    dev=["ruff>=0.16.3", "ty>=0.0.71"]

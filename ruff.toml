@@ -1,0 +1,63 @@
+target-version = "py314"
+line-length = 88
+src = ["src"]
+
+preview = true
+unsafe-fixes = false
+
+exclude = [
+    ".git",
+    ".venv",
+    ".pytest_cache",
+    ".ruff_cache",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[lint]
+select = ["ALL"]
+
+ignore = [
+    # TODOs
+    "TD002",
+    "TD003",
+    "FIX002",
+
+    # Docstrings (enable gradually)
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D107",
+    "D203",
+    "D205",
+    "D213",
+
+    # Tests
+    "S101",
+
+    # Allow Any when needed
+    "ANN401",
+
+    # Security exceptions
+    "S324",
+
+    # Formatter compatibility
+    "COM812",
+    "ISC001",
+]
+
+dummy-variable-rgx = "^(_+|(_[A-Za-z0-9_]*[A-Za-z0-9]+?))$"
+
+[lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "D", "PLR2004"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+docstring-code-format = true

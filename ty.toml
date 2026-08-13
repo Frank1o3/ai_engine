@@ -1,0 +1,32 @@
+# ty.toml
+
+[rules]
+all = "error"
+
+[environment]
+python-version = "3.14"
+python-platform = "linux"
+root = ["./src"]
+
+[src]
+include = [
+    "src",
+    "tests",
+]
+
+exclude = [
+    "build",
+    "dist",
+]
+
+[terminal]
+output-format = "full"
+error-on-warning = true
+
+[[overrides]]
+include = [
+    "tests/**",
+]
+
+[overrides.rules]
+possibly-unresolved-reference = "warn"
