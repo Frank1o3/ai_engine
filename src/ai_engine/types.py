@@ -144,6 +144,7 @@ class OrchestratorConfig:
     base_url: str = ""
     default_model: str = "auto"
     quota_warning_threshold: float = 0.9
+    cache_directory: str = ".groqwave_cache"
     context_file: str = "context.md"
     system_file: str = "system.md"
     memory_file: str = "memory.md"

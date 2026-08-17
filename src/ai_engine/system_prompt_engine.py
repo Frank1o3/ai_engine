@@ -219,6 +219,7 @@ class SystemPromptEngine:
         self.workspace_root = Path(workspace_root) if workspace_root else Path.cwd()
         self._sections: list[Section] = []
         self._raw_content: str = ""
+        self._generated_project_information: str = ""
 
     @classmethod
     def ensure_default_exists(
@@ -226,7 +227,8 @@ class SystemPromptEngine:
     ) -> bool:
         """Create a default system.md in workspace root if it does not exist."""
         root = Path(workspace_root) if workspace_root else Path.cwd()
-        system_path = root / config.system_file
+        system_path = root / config.cache_directory / config.system_file
+        system_path.parent.mkdir(parents=True, exist_ok=True)
         if not system_path.exists():
             system_path.write_text(DEFAULT_SYSTEM_MD, encoding="utf-8")
             return True
@@ -234,7 +236,9 @@ class SystemPromptEngine:
 
     def get_system_path(self) -> Path:
         """Get absolute path to system.md."""
-        return self.workspace_root / self.config.system_file
+        return (
+            self.workspace_root / self.config.cache_directory / self.config.system_file
+        )
 
     def load(self) -> bool:
         """Read and parse system.md from workspace. Returns True if successfully parsed."""
@@ -247,7 +251,9 @@ class SystemPromptEngine:
         try:
             self._raw_content = system_path.read_text(encoding="utf-8")
         except Exception as err:
-            logger.warning(f"[SystemPromptEngine] Failed to read {system_path}: {err}")
+            logger.warning(
+                "[SystemPromptEngine] Failed to read %s: %s", system_path, err
+            )
             self._sections = []
             self._raw_content = ""
             return False
@@ -258,6 +264,22 @@ class SystemPromptEngine:
     def reload(self) -> bool:
         """Reload system.md from disk."""
         return self.load()
+
+    def set_generated_project_information(self, facts: dict[str, str]) -> None:
+        """Set generated facts without changing human-authored system instructions."""
+        useful = [
+            (key.replace("_", " ").title(), value)
+            for key, value in facts.items()
+            if value and value != "unknown"
+        ]
+        self._generated_project_information = (
+            "\n".join([
+                "## Generated Project Information",
+                *[f"- {key}: {value}" for key, value in useful],
+            ])
+            if useful
+            else ""
+        )
 
     def extract_relevant(self, prompt: str, context_content: str | None = None) -> str:
         """Extract sections relevant to prompt and context based on keyword overlap scoring."""
@@ -301,7 +323,10 @@ class SystemPromptEngine:
         if not relevant and self._sections:
             relevant.append(self._sections[0])
 
-        return "\n\n".join(f"## {s.heading}\n{s.content.strip()}" for s in relevant)
+        selected = "\n\n".join(f"## {s.heading}\n{s.content.strip()}" for s in relevant)
+        return "\n\n".join(
+            part for part in (selected, self._generated_project_information) if part
+        )
 
     def get_all_sections(self) -> list[Section]:
         """Return all parsed sections."""

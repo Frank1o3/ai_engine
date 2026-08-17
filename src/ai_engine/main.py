@@ -87,7 +87,7 @@ def main() -> None:
         def on_progress(current: int, total: int) -> None:
             print(f"  [{current}/{total}] files summarized...", end="\r", flush=True)
 
-        markdown = ctx_engine.index_workspace(on_progress)
+        ctx_engine.index_workspace(on_progress)
         print("\nIndexing complete! context.md written.")
 
     elif args.command == "prompt":
@@ -133,7 +133,9 @@ def main() -> None:
     elif args.command == "memory":
         if args.memory_command == "query":
             root = Path(args.workspace).resolve()
-            memory = MemoryEngine(workspace_root=root)
+            memory = MemoryEngine(
+                str(Path(config.cache_directory) / config.memory_file), root
+            )
             memory.load()
             res = memory.retrieve_relevant(args.query_text)
             print(res or "No relevant memory entries found.")

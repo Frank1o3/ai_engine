@@ -13,10 +13,13 @@ import random
 import re
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 
 from .system_prompt_engine import extract_keywords
 from .types import MemoryEntry
+
+MemoryEntryType = Literal["code_summary", "conversation", "observation"]
+MEMORY_ENTRY_TYPES = frozenset({"code_summary", "conversation", "observation"})
 
 
 def short_uuid() -> str:
@@ -58,10 +61,14 @@ def parse_entries(content: str) -> list[MemoryEntry]:
             if inner:
                 tags = [t.strip().strip("\"'") for t in inner.split(",") if t.strip()]
 
+        entry_type = match.group(2).strip()
+        if entry_type not in MEMORY_ENTRY_TYPES:
+            continue
+
         entries.append(
             MemoryEntry(
                 id=match.group(1).strip(),
-                type=match.group(2).strip(),  # type: ignore[arg-type]
+                type=cast(MemoryEntryType, entry_type),
                 source=match.group(3).strip(),
                 created=match.group(4).strip(),
                 last_accessed=match.group(5).strip(),
@@ -217,6 +224,7 @@ class MemoryEngine:
         return list(self._entries)
 
     def _persist_entries(self) -> None:
+        self.memory_file_path.parent.mkdir(parents=True, exist_ok=True)
         header = (
             f"# GropWave Memory\n"
             f"# Generated: {datetime.now(UTC).isoformat()}\n"

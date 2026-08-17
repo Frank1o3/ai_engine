@@ -99,7 +99,7 @@ class OrchestratorCore:
             config, self.groq_client, self.workspace_root
         )
         self.memory_engine = memory_engine or MemoryEngine(
-            config.memory_file, self.workspace_root
+            str(Path(config.cache_directory) / config.memory_file), self.workspace_root
         )
         self.active_file_tracker = active_file_tracker or ActiveFileTracker(
             self.workspace_root
@@ -113,6 +113,9 @@ class OrchestratorCore:
         """Initialize synchronously: load system prompt, memory, and fetch model registry."""
         SystemPromptEngine.ensure_default_exists(self.config, self.workspace_root)
         self.system_prompt_engine.load()
+        self.system_prompt_engine.set_generated_project_information(
+            self.context_engine.get_project_profile()
+        )
         self.memory_engine.load()
         self.memory_engine.decay_all()
         self.model_registry.refresh()
@@ -122,6 +125,9 @@ class OrchestratorCore:
         """Initialize asynchronously."""
         SystemPromptEngine.ensure_default_exists(self.config, self.workspace_root)
         self.system_prompt_engine.load()
+        self.system_prompt_engine.set_generated_project_information(
+            self.context_engine.get_project_profile()
+        )
         self.memory_engine.load()
         self.memory_engine.decay_all()
         await self.model_registry.refresh_async()
@@ -290,11 +296,14 @@ class OrchestratorCore:
     ) -> str | None:
         if self.selected_model and self.selected_model != "auto":
             model = self.model_registry.get_model(self.selected_model)
-            if model and not model.disabled:
-                if self.quota_tracker.can_accept(
+            if (
+                model
+                and not model.disabled
+                and self.quota_tracker.can_accept(
                     model.id, model.limits, estimated_tokens
-                ):
-                    return model.id
+                )
+            ):
+                return model.id
 
         fallback_chain = TIER_FALLBACK_ORDER.get(
             preferred_tier, [preferred_tier, TaskTier.BALANCED, TaskTier.FAST]
@@ -306,8 +315,8 @@ class OrchestratorCore:
             candidates = self.model_registry.get_models_by_tier(tier)
             candidates.sort(
                 key=lambda m: (
-                    statuses.get(m.id).most_constrained.ratio
-                    if statuses.get(m.id)
+                    status.most_constrained.ratio
+                    if (status := statuses.get(m.id))
                     else 0.0
                 )
             )
@@ -330,12 +339,12 @@ class OrchestratorCore:
         )
         messages.append({"role": "system", "content": system_content})
 
-        # Workspace context
-        workspace_ctx = self.context_engine.read_context()
+        # Focused workspace context. context.md remains a human-facing index only.
+        workspace_ctx = self.context_engine.retrieve_relevant(user_prompt)
         if workspace_ctx.strip():
             messages.append({
                 "role": "system",
-                "content": f"## Workspace Context (from context.md)\n{workspace_ctx}",
+                "content": f"## Relevant Workspace Context (indexed)\n{workspace_ctx}",
             })
 
         # Scored memory context

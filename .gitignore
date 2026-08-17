@@ -10,3 +10,6 @@ wheels/
 .venv
 .env
 .ruff_cache
+
+# Project-local GropWave generated index and machine state
+.groqwave_cache/

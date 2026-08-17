@@ -16,9 +16,16 @@ exclude = [
 ]
 
 [lint]
-select = ["ALL"]
+# High-signal correctness, modernization, and maintainability checks.  Full
+# docstring and security-policy suites are intentionally opt-in as this is an
+# executable agent that already applies its own command safety policy.
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
 
 ignore = [
+    # Long prompt templates and SQL statements are deliberately kept readable
+    # as contiguous text; the formatter cannot safely reflow them.
+    "E501",
+
     # TODOs
     "TD002",
     "TD003",

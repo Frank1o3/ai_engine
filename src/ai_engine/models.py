@@ -125,7 +125,8 @@ class ModelRegistry:
             return self._models
         except Exception as err:
             logger.warning(
-                f"[ModelRegistry] Failed to fetch models from API: {err}. Using fallback list."
+                "[ModelRegistry] Failed to fetch models from API: %s. Using fallback list.",
+                err,
             )
             self._models = self._get_fallback_models()
             return self._models
@@ -164,7 +165,7 @@ class ModelRegistry:
             return self._models
         except Exception as err:
             logger.warning(
-                f"[ModelRegistry] Async API fetch failed: {err}. Using fallback list."
+                "[ModelRegistry] Async API fetch failed: %s. Using fallback list.", err
             )
             self._models = self._get_fallback_models()
             return self._models

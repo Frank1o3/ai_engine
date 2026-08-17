@@ -15,7 +15,7 @@ from .agent_tools import (
     run_command_async,
     run_command_sync,
 )
-from .context_engine import ContextEngine, FileSummary
+from .context_engine import ContextEngine, FileSummary, IndexedSymbol
 from .groq_client import GroqClient
 from .memory_engine import MemoryEngine
 from .models import ModelRegistry
@@ -49,6 +49,7 @@ __all__ = [
     "FileEditResult",
     "FileSummary",
     "GroqClient",
+    "IndexedSymbol",
     "MemoryEngine",
     "MemoryEntry",
     "ModelLimits",

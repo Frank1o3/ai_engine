@@ -11,6 +11,7 @@ JavaScript, C-style languages, Go, and Rust.
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 
 @dataclass(slots=True)
@@ -120,7 +121,7 @@ class ActiveFileTracker:
                 if match:
                     indent = len(line) - len(line.lstrip())
                     if class_indent == -1 or indent <= class_indent:
-                        current_class = match.group(1)
+                        current_class = cast(str, match.group(1))
                         class_indent = indent
             return current_class
 
@@ -133,7 +134,7 @@ class ActiveFileTracker:
         ):
             match = class_pattern.match(lines[i])
             if match:
-                return match.group(1)
+                return cast(str, match.group(1))
 
         return None
 
@@ -152,7 +153,7 @@ class ActiveFileTracker:
                 if match:
                     indent = len(line) - len(line.lstrip())
                     if func_indent == -1 or indent <= func_indent:
-                        current_func = match.group(1)
+                        current_func = cast(str, match.group(1))
                         func_indent = indent
             return current_func
 
@@ -175,7 +176,7 @@ class ActiveFileTracker:
             for pattern in func_patterns:
                 match = pattern.match(line)
                 if match:
-                    return match.group(1)
+                    return cast(str, match.group(1))
 
         return None
 

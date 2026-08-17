@@ -8,9 +8,10 @@ for both synchronous and asynchronous operations.
 """
 
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from groq import AsyncGroq, Groq
+from groq.types.chat import ChatCompletionMessageParam
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -39,6 +40,13 @@ class GroqClient:
         """Access raw sync Groq client."""
         return self._sync_client
 
+    @staticmethod
+    def _sdk_messages(
+        messages: list[dict[str, str]],
+    ) -> list[ChatCompletionMessageParam]:
+        """Convert the engine's simple message representation for the SDK boundary."""
+        return cast(list[ChatCompletionMessageParam], messages)
+
     # ─── Async API ─────────────────────────────────────────────────────────────
 
     async def complete_async(
@@ -51,11 +59,11 @@ class GroqClient:
         """Send asynchronous chat completion request and return response text."""
         response = await self._async_client.chat.completions.create(
             model=model,
-            messages=messages,  # type: ignore[arg-type]
+            messages=self._sdk_messages(messages),
             temperature=temperature,
             max_tokens=max_tokens,
         )
-        return response.choices[0].message.content or ""
+        return str(response.choices[0].message.content or "")
 
     async def stream_complete_async(
         self,
@@ -68,7 +76,7 @@ class GroqClient:
         """Stream asynchronous completion, invoking on_chunk for deltas, resolving with full text."""
         stream = await self._async_client.chat.completions.create(
             model=model,
-            messages=messages,  # type: ignore[arg-type]
+            messages=self._sdk_messages(messages),
             temperature=temperature,
             max_tokens=max_tokens,
             stream=True,
@@ -96,11 +104,11 @@ class GroqClient:
         """Send synchronous chat completion request and return response text."""
         response = self._sync_client.chat.completions.create(
             model=model,
-            messages=messages,  # type: ignore[arg-type]
+            messages=self._sdk_messages(messages),
             temperature=temperature,
             max_tokens=max_tokens,
         )
-        return response.choices[0].message.content or ""
+        return str(response.choices[0].message.content or "")
 
     def stream_complete(
         self,
@@ -113,7 +121,7 @@ class GroqClient:
         """Stream synchronous completion, invoking on_chunk for deltas, returning full text."""
         stream = self._sync_client.chat.completions.create(
             model=model,
-            messages=messages,  # type: ignore[arg-type]
+            messages=self._sdk_messages(messages),
             temperature=temperature,
             max_tokens=max_tokens,
             stream=True,

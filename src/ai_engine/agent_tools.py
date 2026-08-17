@@ -99,6 +99,7 @@ async def run_command_async(
         )
 
     working_dir = str(cwd) if cwd else None
+    proc: asyncio.subprocess.Process | None = None
     try:
         proc = await asyncio.create_subprocess_shell(
             command,
@@ -118,7 +119,8 @@ async def run_command_async(
         )
     except TimeoutError:
         try:
-            proc.kill()
+            if proc is not None:
+                proc.kill()
         except Exception:
             pass
         return TerminalResult(
