@@ -4,10 +4,10 @@
     "source.fixAll.ruff": "always",
     "source.organizeImports.ruff": "always"
   },
+  "python.languageServer": "None",
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff"
   },
-  "python.analysis.typeCheckingMode": "off",
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "editor.rulers": [

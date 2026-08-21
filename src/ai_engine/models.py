@@ -20,7 +20,6 @@ from .types import (
 logger = logging.getLogger(__name__)
 
 # Default per-model limits (approximations based on public Groq documentation)
-# Default per-model limits (approximations based on public Groq documentation)
 DEFAULT_MODEL_LIMITS: dict[str, ModelLimits] = {
     "allam-2-7b": ModelLimits(rpm=30, rpd=7000, tpm=6000, tpd=500000),
     "groq/compound": ModelLimits(

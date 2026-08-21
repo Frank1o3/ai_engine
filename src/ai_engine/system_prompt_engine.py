@@ -169,7 +169,7 @@ def extract_keywords(text: str, max_count: int = 15) -> list[str]:
     return unique
 
 
-DEFAULT_SYSTEM_MD = """## General Rules
+DEFAULT_SYSTEM_MD = """# General Rules
 
 - Always read the user's request carefully and reference workspace context before responding.
 - When writing code, prefer clear, idiomatic patterns appropriate for the target language.
